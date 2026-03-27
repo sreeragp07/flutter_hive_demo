@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_demo/product.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,9 +13,9 @@ class _HomeScreenState extends State<HomeScreen> {
   TextEditingController nameController = TextEditingController();
   TextEditingController priceController = TextEditingController();
   bool isLoading = false;
-  List products = [];
+  List<Product> products = [];
 
-  final box = Hive.box("products");
+  final box = Hive.box<Product>("products");
 
   loadProducts() {
     final list = box.values.toList();
@@ -24,7 +25,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   addProduct() async {
-    FocusScope.of(context).unfocus();
     setState(() {
       isLoading = true;
     });
@@ -43,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     await Future.delayed(Duration(seconds: 2));
 
-    await box.add({"name": name, "price": price});
+    await box.add(Product(name: name, price: price));
 
     if (!mounted) return;
 
@@ -81,12 +81,18 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "Hive Demo App",
+          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
+        ),
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 70),
+            SizedBox(height: 20),
             TextField(
               controller: nameController,
               decoration: InputDecoration(
@@ -100,6 +106,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
+              onTapOutside: (_) {
+                FocusScope.of(context).unfocus();
+              },
             ),
             SizedBox(height: 20),
             TextField(
@@ -115,6 +124,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
+              onTapOutside: (_) {
+                FocusScope.of(context).unfocus();
+              },
             ),
             SizedBox(height: 30),
             SizedBox(
@@ -135,6 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
+                          color: Colors.black,
                         ),
                       ),
               ),
@@ -161,8 +174,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             border: Border.all(color: Colors.blue),
                           ),
                           child: ListTile(
-                            title: Text(products[index]['name']),
-                            subtitle: Text("Rs. ${products[index]['price']}"),
+                            title: Text(products[index].name),
+                            subtitle: Text("Rs. ${products[index].price}"),
                             trailing: GestureDetector(
                               onTap: () => deleteProduct(index),
                               child: Icon(Icons.delete),
